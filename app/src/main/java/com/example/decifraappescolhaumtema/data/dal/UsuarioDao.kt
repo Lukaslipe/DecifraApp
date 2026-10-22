@@ -42,6 +42,20 @@ internal class UsuarioDao(context: Context) {
         }
     }
 
+    fun buscarIdPorNome(nome: String): Long? {
+        return AppDatabase(appContext).use { db ->
+            db.readableDatabase.query(
+                "usuarios",
+                arrayOf("id"),
+                "nome = ?",
+                arrayOf(nome),
+                null, null, null
+            ).use { cursor ->
+                if (cursor.moveToFirst()) cursor.getLong(0) else null
+            }
+        }
+    }
+
     fun listar(): List<Usuario> = AppDatabase(appContext).use { db ->
         db.readableDatabase.query(
             "usuarios",

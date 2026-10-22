@@ -1,6 +1,5 @@
 package com.example.decifraappescolhaumtema
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +18,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,22 +26,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.decifraappescolhaumtema.auth.AuthManager
+import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 
 @Composable
 fun TelaCriarConta(
     onContaCriadaClick: () -> Unit,
+    authViewModel: AuthViewModel,
     modifier: Modifier = Modifier
 ) {
     var usuario by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
-    val context = LocalContext.current
+
+    LaunchedEffect(authViewModel.concluido) {
+        if (authViewModel.concluido) {
+            authViewModel.consumirResultado()
+            onContaCriadaClick()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -62,7 +67,7 @@ fun TelaCriarConta(
 
         OutlinedTextField(
             value = usuario,
-            onValueChange = { usuario = it },
+            onValueChange = { if (it.length <= 100) usuario = it },
             placeholder = { Text(text = "Usuário", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
@@ -81,7 +86,7 @@ fun TelaCriarConta(
 
         OutlinedTextField(
             value = senha,
-            onValueChange = { senha = it },
+            onValueChange = { if (it.length <= 128) senha = it },
             placeholder = { Text(text = "Senha", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -97,30 +102,32 @@ fun TelaCriarConta(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Text(
+            text = "Use uma senha entre 6 e 128 caracteres",
+            color = Color(0xFFA0A0A0),
+            fontSize = 12.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+        )
+
+        authViewModel.mensagem?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = Color(0xFFEF224A))
+        }
+        if (authViewModel.carregando) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Aguarde...", color = Color.Black)
+        }
+
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
             onClick = {
-                if(usuario.isBlank() || senha.isBlank()) {
-                    Toast.makeText(context,
-                        "Preencha todos os campos",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    if (AuthManager.cadastro(usuario, senha)){
-                        Toast.makeText(context,
-                            "Cadastro realizado com Sucesso!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        onContaCriadaClick()
-                    } else {
-                        Toast.makeText(context,
-                            "Usuario já cadastrado!",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
+                authViewModel.cadastrar(usuario, senha)
+                senha = ""
             },
+            enabled = !authViewModel.carregando,
             modifier = Modifier
                 .width(220.dp)
                 .height(55.dp)
@@ -138,9 +145,8 @@ fun TelaCriarConta(
             )
         }
 
-        TextButton(onClick = onContaCriadaClick) {
+        TextButton(onClick = onContaCriadaClick, enabled = !authViewModel.carregando) {
             Text("Já tenho cadastro.")
         }
     }
 }
-

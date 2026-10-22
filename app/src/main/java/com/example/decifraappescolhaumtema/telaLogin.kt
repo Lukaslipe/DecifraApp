@@ -1,9 +1,7 @@
 package com.example.decifraappescolhaumtema
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +18,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,24 +26,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.decifraappescolhaumtema.auth.AuthManager
+import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 
 @Composable
 fun TelaLogin(
     onEntrarClick: () -> Unit,
     onCriarContaClick: () -> Unit,
+    authViewModel: AuthViewModel,
     modifier: Modifier = Modifier
 ) {
     var usuario by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
-    val context = LocalContext.current
+
+    LaunchedEffect(authViewModel.concluido) {
+        if (authViewModel.concluido) {
+            authViewModel.consumirResultado()
+            onEntrarClick()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -65,7 +68,7 @@ fun TelaLogin(
 
         OutlinedTextField(
             value = usuario,
-            onValueChange = { usuario = it },
+            onValueChange = { if (it.length <= 100) usuario = it },
             placeholder = { Text(text = "Usuário", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
@@ -84,7 +87,7 @@ fun TelaLogin(
 
         OutlinedTextField(
             value = senha,
-            onValueChange = { senha = it },
+            onValueChange = { if (it.length <= 128) senha = it },
             placeholder = { Text(text = "Senha", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -100,19 +103,23 @@ fun TelaLogin(
             modifier = Modifier.fillMaxWidth()
         )
 
+        authViewModel.mensagem?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = Color(0xFFEF224A))
+        }
+        if (authViewModel.carregando) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Aguarde...", color = Color.Black)
+        }
+
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
             onClick = {
-                if (AuthManager.login(usuario, senha)){
-                    onEntrarClick()
-                }else{
-                    Toast.makeText(context,
-                        "Usuário ou Senha Inválido!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                authViewModel.login(usuario, senha)
+                senha = ""
             },
+            enabled = !authViewModel.carregando,
             modifier = Modifier
                 .width(220.dp)
                 .height(55.dp)
@@ -132,7 +139,7 @@ fun TelaLogin(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        TextButton(onClick = onCriarContaClick) {
+        TextButton(onClick = onCriarContaClick, enabled = !authViewModel.carregando) {
             Text("Não tem conta? Cadastre-se")
         }
     }

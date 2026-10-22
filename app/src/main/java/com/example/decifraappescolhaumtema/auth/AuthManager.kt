@@ -1,19 +1,35 @@
 package com.example.decifraappescolhaumtema.auth
 
-object AuthManager {
-    data class  User(
-        val usuario: String,
-        val senha: String)
-    private val usuarios = mutableListOf<User>()
+import java.security.MessageDigest
+import java.security.SecureRandom
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 
-    fun login(usuario: String, senha: String): Boolean{
-        return usuarios.any { it.usuario == usuario && it.senha == senha }
+object AuthManager {
+    private const val ITERACOES = 100_000
+
+    fun criarSalt(): ByteArray = ByteArray(16).also {
+        SecureRandom().nextBytes(it)
     }
 
-    fun cadastro(usuario: String, senha: String): Boolean{
-        if(usuarios.any { it.usuario == usuario }) return false
+    fun gerarHash(senha: String, salt: ByteArray): ByteArray {
+        val spec = PBEKeySpec(senha.toCharArray(), salt, ITERACOES, 256)
 
-        usuarios.add(User(usuario, senha))
-        return true
+        return try {
+            SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+                .generateSecret(spec).encoded
+        } finally {
+            spec.clearPassword()
+        }
+    }
+
+    fun validarSenha(senha: String, salt: ByteArray, senhaDB: ByteArray): Boolean {
+        val senhaHash = gerarHash(senha, salt)
+
+        return try {
+            MessageDigest.isEqual(senhaDB, senhaHash)
+        } finally {
+            senhaHash.fill(0)
+        }
     }
 }

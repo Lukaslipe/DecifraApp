@@ -2,11 +2,13 @@ package com.example.decifraappescolhaumtema.Navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.decifraappescolhaumtema.*
+import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 
 @Composable
 fun AppNavigation(
@@ -27,23 +29,29 @@ fun AppNavigation(
         }
 
         composable<Login> {
+            val authViewModel: AuthViewModel = viewModel()
             TelaLogin(
                 onEntrarClick = {
-                    navController.navigate(Instrucoes)
+                    navController.navigate(Instrucoes) {
+                        popUpTo<Login> { inclusive = true }
+                    }
                 },
                 onCriarContaClick = {
                     navController.navigate(CriarConta)
-                }
+                },
+                authViewModel = authViewModel
             )
         }
 
         composable<CriarConta> {
+            val authViewModel: AuthViewModel = viewModel()
             TelaCriarConta(
                 onContaCriadaClick = {
                     navController.navigate(Login) {
                         popUpTo<CriarConta> { inclusive = true }
                     }
-                }
+                },
+                authViewModel = authViewModel
             )
         }
 
