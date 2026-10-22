@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 fun TelaAcerto(
     palavra: String = "CARGA",
     pontos: Int = 5,
+    venceu: Boolean = true,
     onReiniciarClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -45,7 +46,7 @@ fun TelaAcerto(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Acertou!",
+            text = if (venceu) "Acertou!" else "Não foi dessa vez!",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
@@ -72,27 +73,39 @@ fun TelaAcerto(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        Box(
-            modifier = Modifier
-                .size(120.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.img_estrelas),
-                contentDescription = "Estrelas de vitória",
-                modifier = Modifier.size(120.dp)
+        if (venceu) {
+            Box(
+                modifier = Modifier
+                    .size(120.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.img_estrelas),
+                    contentDescription = "Estrelas de vitória",
+                    modifier = Modifier.size(120.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Você acumulou\n$pontos pontos!",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Tente novamente!",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = TextAlign.Center
             )
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Você acumulou\n$pontos pontos!",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            textAlign = TextAlign.Center
-        )
 
         Spacer(modifier = Modifier.height(48.dp))
 

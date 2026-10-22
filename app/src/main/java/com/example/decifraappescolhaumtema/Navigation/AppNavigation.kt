@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.decifraappescolhaumtema.*
 import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
+import com.example.decifraappescolhaumtema.ui.viewmodel.JogoViewModel
 
 @Composable
 fun AppNavigation(
@@ -73,11 +74,15 @@ fun AppNavigation(
 
         composable<Jogo> { backStackEntry ->
             val args = backStackEntry.toRoute<Jogo>()
+            val jogoViewModel: JogoViewModel = viewModel()
 
             TelaJogo(
                 tema = args.tema,
-                onJogoFinalizado = { palavraCerta, pontosGanhos ->
-                    navController.navigate(Acerto(palavra = palavraCerta, pontos = pontosGanhos)) {
+                jogoViewModel = jogoViewModel,
+                onJogoFinalizado = { palavraCerta, pontosGanhos, venceu ->
+                    navController.navigate(
+                        Acerto(palavra = palavraCerta, pontos = pontosGanhos, venceu = venceu)
+                    ) {
                         popUpTo<Jogo> { inclusive = true }
                     }
                 }
@@ -90,6 +95,7 @@ fun AppNavigation(
             TelaAcerto(
                 palavra = rota.palavra,
                 pontos = rota.pontos,
+                venceu = rota.venceu,
                 onReiniciarClick = {
                     navController.navigate(EscolherTema) {
                         popUpTo<EscolherTema> { inclusive = true }
