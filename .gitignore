@@ -1,0 +1,35 @@
+# Arquivos gerados pelo Gradle
+.gradle/
+build/
+/app/build/
+/captures
+
+# Arquivos locais da máquina (NUNCA versionar)
+local.properties
+
+# Android Studio / IntelliJ
+*.iml
+.idea/caches
+.idea/libraries
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetDropDown.xml
+.idea/deploymentTargetSelector.xml
+
+# NDK / C++
+.externalNativeBuild
+.cxx
+
+# Kotlin
+.kotlin/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs e keystore de assinatura (não vazar chaves)
+*.log
+*.jks
+*.keystore

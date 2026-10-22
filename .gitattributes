@@ -1,0 +1,17 @@
+# Normaliza quebras de linha automaticamente
+* text=auto
+
+# Scripts shell devem manter LF
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Script batch do Windows mantém CRLF
+gradlew.bat text eol=crlf
+*.bat text eol=crlf
+
+# Arquivos binários não devem ser alterados
+*.png binary
+*.webp binary
+*.jar binary
+*.jks binary
+*.keystore binary

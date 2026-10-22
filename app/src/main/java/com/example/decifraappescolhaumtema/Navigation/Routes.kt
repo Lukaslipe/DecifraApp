@@ -1,0 +1,36 @@
+package com.example.decifraappescolhaumtema.Navigation
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object Inicial{
+
+}
+
+@Serializable
+data object Login{
+
+}
+
+@Serializable
+data object CriarConta{
+
+}
+
+@Serializable
+data object Instrucoes{
+
+}
+
+@Serializable
+data object EscolherTema{
+
+}
+
+@Serializable
+data class Jogo(val tema: String){
+
+}
+
+@Serializable
+data class Acerto(val palavra: String, val pontos: Int)
