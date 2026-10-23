@@ -13,12 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// Resultado de cada letra apos a avaliacao de uma tentativa (estilo Termo).
 enum class Resultado {
-    CERTA,    // letra certa, posicao certa (verde)
-    PRESENTE, // letra existe na palavra, posicao errada (amarelo)
-    AUSENTE,  // letra nao existe na palavra (cinza)
-    VAZIA     // celula ainda nao preenchida/avaliada
+    CERTA,
+    PRESENTE,
+    AUSENTE,
+    VAZIA
 }
 
 enum class EstadoJogo {
@@ -39,11 +38,9 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
     var tema by mutableStateOf("")
         private set
 
-    // Letras digitadas em cada linha (6 linhas x 5 colunas).
     var tentativas by mutableStateOf(List(maxTentativas) { List(tamanho) { ' ' } })
         private set
 
-    // Cores/resultados de cada linha ja avaliada.
     var resultados by mutableStateOf(
         List(maxTentativas) { List(tamanho) { Resultado.VAZIA } }
     )
@@ -65,7 +62,6 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
 
     val palavraCerta: String get() = palavraSecreta
 
-    // Inicia (ou reinicia) o jogo com o tema escolhido. Sorteia uma nova palavra.
     fun iniciar(tema: String) {
         this.tema = tema
         palavraSecreta = BancoPalavras.sortear(tema)
@@ -124,12 +120,10 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Avaliacao estilo Termo, tratando letras repetidas por contagem de ocorrencias.
     private fun avaliar(tentativa: String, secreta: String): List<Resultado> {
         val resultado = MutableList(tamanho) { Resultado.AUSENTE }
         val restantes = HashMap<Char, Int>()
 
-        // 1a passada: marca as certas (verde) e conta as letras que sobraram.
         for (i in 0 until tamanho) {
             if (tentativa[i] == secreta[i]) {
                 resultado[i] = Resultado.CERTA
@@ -138,7 +132,6 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // 2a passada: marca as presentes (amarelo) respeitando a contagem.
         for (i in 0 until tamanho) {
             if (resultado[i] == Resultado.CERTA) continue
             val letra = tentativa[i]
@@ -152,7 +145,6 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
         return resultado
     }
 
-    // Quanto mais cedo acertar, mais pontos. Linha 0 = 6 "acertos", linha 5 = 1.
     private fun calcularPontos(linha: Int): Int {
         return (maxTentativas - linha) * 10
     }

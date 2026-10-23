@@ -35,21 +35,20 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun TelaInstrucoes(
     onContinuarClick: () -> Unit = {},
-    onUsuariosClick: () -> Unit = {}, // Novo callback para o botão de usuários
+    onUsuariosClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Box( // Mudei de Column para Box como container principal para permitir o botão flutuante
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFF4E9E0))
     ) {
-        // O botão de usuários no canto superior direito
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp)
                 .size(48.dp)
-                .background(Color(0xFF007E99), RoundedCornerShape(24.dp)) // Cor azul que combina com a tela de usuários
+                .background(Color(0xFF007E99), RoundedCornerShape(24.dp))
                 .clickable { onUsuariosClick() },
             contentAlignment = Alignment.Center
         ) {
@@ -60,7 +59,6 @@ fun TelaInstrucoes(
             )
         }
 
-        // O conteúdo original da tela dentro do Box principal
         Column(
             modifier = Modifier
                 .fillMaxSize()

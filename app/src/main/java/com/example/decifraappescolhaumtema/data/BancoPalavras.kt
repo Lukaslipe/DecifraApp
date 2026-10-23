@@ -4,7 +4,6 @@ object BancoPalavras {
 
     const val TAMANHO_PALAVRA = 5
 
-    // Palavras de 5 letras, sem acento (o teclado do jogo so tem A-Z).
     private val palavrasPorTema: Map<String, List<String>> = mapOf(
         "Animais" to listOf(
             "GATOS", "TIGRE", "ZEBRA", "POMBO", "URSOS",

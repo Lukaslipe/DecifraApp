@@ -39,14 +39,14 @@ fun TelaUsuarios(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF4E9E0)) // Cor de fundo do app
+            .background(Color(0xFFF4E9E0))
             .padding(24.dp)
     ) {
         Text(
             text = "Usuários",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF007E99) // Azul do título
+            color = Color(0xFF007E99)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -63,7 +63,7 @@ fun TelaUsuarios(
                     .height(48.dp)
                     .border(1.dp, Color.Black, RoundedCornerShape(24.dp)),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFEBC110), // Amarelo
+                    containerColor = Color(0xFFEBC110),
                     contentColor = Color.Black
                 ),
                 shape = RoundedCornerShape(24.dp)
@@ -80,7 +80,7 @@ fun TelaUsuarios(
                     .height(48.dp)
                     .border(1.dp, Color.Black, RoundedCornerShape(24.dp)),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6BB825), // Verde
+                    containerColor = Color(0xFF6BB825),
                     contentColor = Color.Black
                 ),
                 shape = RoundedCornerShape(24.dp)
@@ -128,17 +128,12 @@ fun ItemUsuario(
             )
             .padding(20.dp)
     ) {
-        // Mostra o nome do usuário
         Text(
             text = usuario.nome,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
-
-        // APAGUE a parte do usuario.email que estava aqui!
-        // Se quiser mostrar o ID no lugar, você pode adicionar:
-        // Text(text = "ID: ${usuario.id}", fontSize = 16.sp, color = Color.Gray)
 
         Spacer(modifier = Modifier.height(24.dp))
 

@@ -36,7 +36,6 @@ val CorLinhaVerde = Color(0xFF67B82D)
 val CorLinhaAmarela = Color(0xFFE8B614)
 val CorLinhaVermelha = Color(0xFFDF1D44)
 
-// Cores da avaliacao estilo Termo.
 val CorCerta = Color(0xFF67B82D)
 val CorPresente = Color(0xFFE8B614)
 val CorAusente = Color(0xFF787C7E)
@@ -48,7 +47,6 @@ fun TelaJogo(
     onJogoFinalizado: (String, Int, Boolean) -> Unit = { _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
-    // Sorteia a palavra uma unica vez por tema.
     LaunchedEffect(tema) {
         jogoViewModel.iniciar(tema)
     }
@@ -154,8 +152,6 @@ fun TecladoCustom(
     onApagar: () -> Unit,
     onConfirmar: () -> Unit
 ) {
-    // Layout QWERTY padrao, em 3 fileiras. ENTER e apagar ficam na ultima fileira,
-    // ao lado das letras, como num teclado de celular normal.
     val fileira1 = listOf('Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P')
     val fileira2 = listOf('A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L')
     val fileira3 = listOf('Z', 'X', 'C', 'V', 'B', 'N', 'M')
