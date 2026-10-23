@@ -18,23 +18,24 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.decifraappescolhaumtema.data.model.Usuario
+import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
 
 @Composable
 fun TelaUsuarios(
-    usuarios: List<Usuario>,
+    viewModel: UsuarioViewModel,
     onNovoUsuarioClick: () -> Unit = {},
-    onAtualizarListaClick: () -> Unit = {},
     onAlterarClick: (Usuario) -> Unit = {},
-    onExcluirClick: (Usuario) -> Unit = {},
     modifier: Modifier = Modifier
 ){
+    LaunchedEffect(Unit) { viewModel.listar() }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -71,7 +72,8 @@ fun TelaUsuarios(
             }
 
             Button(
-                onClick = onAtualizarListaClick,
+                onClick = { viewModel.listar() },
+                enabled = !viewModel.carregando,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)
@@ -87,17 +89,23 @@ fun TelaUsuarios(
             }
         }
 
+        viewModel.mensagem?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = Color(0xFFF2385A))
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(usuarios) { usuario ->
+            items(viewModel.usuarios) { usuario ->
                 ItemUsuario(
                     usuario = usuario,
+                    podeExcluir = usuario.id != viewModel.usuarioAtivoId,
                     onAlterarClick = { onAlterarClick(usuario) },
-                    onExcluirClick = { onExcluirClick(usuario) }
+                    onExcluirClick = { viewModel.excluir(usuario.id) }
                 )
             }
         }
@@ -107,6 +115,7 @@ fun TelaUsuarios(
 @Composable
 fun ItemUsuario(
     usuario: Usuario,
+    podeExcluir: Boolean,
     onAlterarClick: () -> Unit,
     onExcluirClick: () -> Unit
 ) {
@@ -143,24 +152,14 @@ fun ItemUsuario(
                 fontSize = 16.sp,
                 modifier = Modifier.clickable { onAlterarClick() }
             )
-            Text(
-                text = "Excluir",
-                color = Color(0xFFF2385A),
-                fontSize = 16.sp,
-                modifier = Modifier.clickable { onExcluirClick() }
-            )
+            if (podeExcluir) {
+                Text(
+                    text = "Excluir",
+                    color = Color(0xFFF2385A),
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable { onExcluirClick() }
+                )
+            }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewTelaUsuarios() {
-    // Lista de exemplo com a estrutura real (id e nome) para o Preview funcionar sem erro
-    TelaUsuarios(
-        usuarios = listOf(
-            Usuario(id = 1L, nome = "elo"),
-            Usuario(id = 2L, nome = "eloisa")
-        )
-    )
 }

@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,19 +26,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
 
 @Composable
 fun TelaAlterarUsuario(
-    nome: String,
-    senha: String,
-    carregando: Boolean,
-    mensagem: String?,
-    onNomeChange: (String) -> Unit,
-    onSenhaChange: (String) -> Unit,
-    onSalvarClick: () -> Unit,
+    usuarioId: Long,
+    viewModel: UsuarioViewModel,
     onVoltarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    LaunchedEffect(usuarioId) { viewModel.buscarPorId(usuarioId) }
+    LaunchedEffect(viewModel.salvo) {
+        if (viewModel.salvo) {
+            viewModel.consumirSalvo()
+            onVoltarClick()
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -56,8 +61,9 @@ fun TelaAlterarUsuario(
         Spacer(modifier = Modifier.height(48.dp))
 
         OutlinedTextField(
-            value = nome,
-            onValueChange = { if (it.length <= 100) onNomeChange(it) },
+            value = viewModel.nome,
+            onValueChange = viewModel::mudarNome,
+            enabled = !viewModel.carregando,
             placeholder = { Text(text = "Usuário", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
@@ -75,8 +81,9 @@ fun TelaAlterarUsuario(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = senha,
-            onValueChange = { if (it.length <= 128) onSenhaChange(it) },
+            value = viewModel.senha,
+            onValueChange = viewModel::mudarSenha,
+            enabled = !viewModel.carregando,
             placeholder = { Text(text = "Nova senha (opcional)", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
@@ -101,11 +108,11 @@ fun TelaAlterarUsuario(
                 .padding(top = 4.dp)
         )
 
-        mensagem?.let {
+        viewModel.mensagem?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = it, color = Color(0xFFEF224A))
         }
-        if (carregando) {
+        if (viewModel.carregando) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Aguarde...", color = Color.Black)
         }
@@ -113,8 +120,8 @@ fun TelaAlterarUsuario(
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
-            onClick = onSalvarClick,
-            enabled = !carregando,
+            onClick = { viewModel.salvar() },
+            enabled = !viewModel.carregando && !viewModel.salvo,
             modifier = Modifier
                 .width(220.dp)
                 .height(55.dp)
@@ -132,7 +139,7 @@ fun TelaAlterarUsuario(
             )
         }
 
-        TextButton(onClick = onVoltarClick, enabled = !carregando) {
+        TextButton(onClick = onVoltarClick, enabled = !viewModel.carregando) {
             Text("Cancelar")
         }
     }

@@ -8,23 +8,26 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.decifraappescolhaumtema.data.dal.RankingUsuario
+import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
 
 @Composable
 fun TelaRanking(
-    ranking: List<RankingUsuario>,
-    usuarioAtualId: Long,
+    viewModel: UsuarioViewModel,
     onReiniciarClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    LaunchedEffect(Unit) { viewModel.carregarRanking() }
+
+    val ranking = viewModel.ranking
+    val usuarioAtualId = viewModel.usuarioAtivoId ?: -1L
     val posicaoAtual = ranking.indexOfFirst { it.id == usuarioAtualId }
     val usuarioAtual = ranking.getOrNull(posicaoAtual)
 
@@ -201,17 +204,4 @@ fun CardItemRanking(
             color = Color.Black
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewTelaRanking() {
-    TelaRanking(
-        ranking = listOf(
-            RankingUsuario(1L, "Mylena", 50),
-            RankingUsuario(2L, "Lucas", 30),
-            RankingUsuario(3L, "Elo", 10)
-        ),
-        usuarioAtualId = 2L
-    )
 }
