@@ -21,6 +21,7 @@ import androidx.navigation.toRoute
 import com.example.decifraappescolhaumtema.*
 import com.example.decifraappescolhaumtema.auth.AuthManager
 import com.example.decifraappescolhaumtema.auth.SessaoUsuario
+import com.example.decifraappescolhaumtema.data.dal.RankingUsuario
 import com.example.decifraappescolhaumtema.data.dal.UsuarioDao
 import com.example.decifraappescolhaumtema.data.model.Usuario
 import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
@@ -125,6 +126,29 @@ fun AppNavigation(
                 palavra = rota.palavra,
                 pontos = rota.pontos,
                 venceu = rota.venceu,
+                onReiniciarClick = {
+                    navController.navigate(EscolherTema) {
+                        popUpTo<EscolherTema> { inclusive = true }
+                    }
+                },
+                onRankingClick = {
+                    navController.navigate(Ranking)
+                }
+            )
+        }
+
+        composable<Ranking> { backStackEntry ->
+            val context = LocalContext.current
+            val usuarioDao = remember { UsuarioDao(context) }
+            var ranking by remember { mutableStateOf(emptyList<RankingUsuario>()) }
+
+            LaunchedEffect(Unit) {
+                ranking = withContext(Dispatchers.IO) { usuarioDao.listarRanking() }
+            }
+
+            TelaRanking(
+                ranking = ranking,
+                usuarioAtualId = SessaoUsuario.usuarioId ?: -1L,
                 onReiniciarClick = {
                     navController.navigate(EscolherTema) {
                         popUpTo<EscolherTema> { inclusive = true }

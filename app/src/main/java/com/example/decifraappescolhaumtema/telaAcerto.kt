@@ -35,6 +35,7 @@ fun TelaAcerto(
     pontos: Int = 5,
     venceu: Boolean = true,
     onReiniciarClick: () -> Unit = {},
+    onRankingClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -125,6 +126,28 @@ fun TelaAcerto(
                 painter = painterResource(id = R.drawable.refresh_svgrepo_com),
                 contentDescription = "Reiniciar",
                 modifier = Modifier.size(32.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onRankingClick,
+            modifier = Modifier
+                .width(220.dp)
+                .height(60.dp)
+                .border(2.dp, Color.Black, RoundedCornerShape(30.dp)),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFEBC110),
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(30.dp)
+        ) {
+            Text(
+                text = "Ranking",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
             )
         }
     }

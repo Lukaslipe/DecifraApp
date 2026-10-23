@@ -7,6 +7,8 @@ import com.example.decifraappescolhaumtema.data.model.Usuario
 
 internal class SenhaSalva(val hash: ByteArray, val salt: ByteArray)
 
+data class RankingUsuario(val id: Long, val nome: String, val pontos: Int)
+
 internal class UsuarioDao(context: Context) {
     private val appContext = context.applicationContext
 
@@ -69,6 +71,37 @@ internal class UsuarioDao(context: Context) {
                         Usuario(
                             cursor.getLong(0),
                             cursor.getString(1)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun somarPontos(id: Long, pontos: Int) {
+        if (pontos <= 0) return
+        AppDatabase(appContext).use { db ->
+            db.writableDatabase.execSQL(
+                "UPDATE usuarios SET pontos = pontos + ? WHERE id = ?",
+                arrayOf(pontos, id)
+            )
+        }
+    }
+
+    fun listarRanking(): List<RankingUsuario> = AppDatabase(appContext).use { db ->
+        db.readableDatabase.query(
+            "usuarios",
+            arrayOf("id", "nome", "pontos"),
+            null, null, null, null,
+            "pontos DESC, nome COLLATE NOCASE"
+        ).use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(
+                        RankingUsuario(
+                            cursor.getLong(0),
+                            cursor.getString(1),
+                            cursor.getInt(2)
                         )
                     )
                 }

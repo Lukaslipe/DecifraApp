@@ -9,7 +9,7 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
     context.applicationContext,
     File(context.noBackupFilesDir, "aula_sqlite.db").absolutePath,
     null,
-    1
+    2
 ) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -18,14 +18,16 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
             id INTEGER PRIMARY KEY,
             nome TEXT NOT NULL UNIQUE CHECK(length(nome) BETWEEN 3 AND 100),
             senha BLOB NOT NULL,
-            salt BLOB NOT NULL
+            salt BLOB NOT NULL,
+            pontos INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS usuarios")
-        onCreate(db)
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE usuarios ADD COLUMN pontos INTEGER NOT NULL DEFAULT 0")
+        }
     }
 }

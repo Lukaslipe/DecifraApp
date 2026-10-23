@@ -38,3 +38,6 @@ data object Usuarios
 
 @Serializable
 data class AlterarUsuario(val id: Long)
+
+@Serializable
+data object Ranking

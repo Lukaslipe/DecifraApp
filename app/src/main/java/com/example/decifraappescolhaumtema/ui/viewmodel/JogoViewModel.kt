@@ -5,7 +5,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.decifraappescolhaumtema.auth.SessaoUsuario
 import com.example.decifraappescolhaumtema.data.BancoPalavras
+import com.example.decifraappescolhaumtema.data.dal.UsuarioDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // Resultado de cada letra apos a avaliacao de uma tentativa (estilo Termo).
 enum class Resultado {
@@ -22,6 +28,8 @@ enum class EstadoJogo {
 }
 
 class JogoViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val dao = UsuarioDao(application)
 
     private val tamanho = BancoPalavras.TAMANHO_PALAVRA
     private val maxTentativas = 6
@@ -106,6 +114,7 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
         if (tentativa == palavraSecreta) {
             estado = EstadoJogo.VENCEU
             pontos = calcularPontos(linhaAtual)
+            salvarPontos(pontos)
         } else if (linhaAtual == maxTentativas - 1) {
             estado = EstadoJogo.PERDEU
             pontos = 0
@@ -146,5 +155,14 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
     // Quanto mais cedo acertar, mais pontos. Linha 0 = 6 "acertos", linha 5 = 1.
     private fun calcularPontos(linha: Int): Int {
         return (maxTentativas - linha) * 10
+    }
+
+    private fun salvarPontos(pontos: Int) {
+        val id = SessaoUsuario.usuarioId ?: return
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                dao.somarPontos(id, pontos)
+            }
+        }
     }
 }
