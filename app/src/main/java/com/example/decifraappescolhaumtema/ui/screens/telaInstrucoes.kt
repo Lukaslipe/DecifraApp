@@ -1,4 +1,4 @@
-package com.example.decifraappescolhaumtema
+package com.example.decifraappescolhaumtema.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

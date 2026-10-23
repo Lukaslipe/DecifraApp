@@ -7,7 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.example.decifraappescolhaumtema.*
+import com.example.decifraappescolhaumtema.ui.screens.*
 import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.JogoViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel

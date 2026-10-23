@@ -1,4 +1,4 @@
-package com.example.decifraappescolhaumtema
+package com.example.decifraappescolhaumtema.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,10 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,22 +26,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
+import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
 
 @Composable
-fun TelaLogin(
-    onEntrarClick: () -> Unit,
-    onCriarContaClick: () -> Unit,
-    authViewModel: AuthViewModel,
+fun TelaAlterarUsuario(
+    usuarioId: Long,
+    viewModel: UsuarioViewModel,
+    onVoltarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var usuario by remember { mutableStateOf("") }
-    var senha by remember { mutableStateOf("") }
-
-    LaunchedEffect(authViewModel.concluido) {
-        if (authViewModel.concluido) {
-            authViewModel.consumirResultado()
-            onEntrarClick()
+    LaunchedEffect(usuarioId) { viewModel.buscarPorId(usuarioId) }
+    LaunchedEffect(viewModel.salvo) {
+        if (viewModel.salvo) {
+            viewModel.consumirSalvo()
+            onVoltarClick()
         }
     }
 
@@ -58,7 +52,7 @@ fun TelaLogin(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Login",
+            text = "Alterar usuário",
             fontSize = 36.sp,
             fontWeight = FontWeight.Normal,
             color = Color.Black
@@ -67,8 +61,9 @@ fun TelaLogin(
         Spacer(modifier = Modifier.height(48.dp))
 
         OutlinedTextField(
-            value = usuario,
-            onValueChange = { if (it.length <= 100) usuario = it },
+            value = viewModel.nome,
+            onValueChange = viewModel::mudarNome,
+            enabled = !viewModel.carregando,
             placeholder = { Text(text = "Usuário", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
@@ -86,9 +81,10 @@ fun TelaLogin(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = senha,
-            onValueChange = { if (it.length <= 128) senha = it },
-            placeholder = { Text(text = "Senha", color = Color(0xFFA0A0A0)) },
+            value = viewModel.senha,
+            onValueChange = viewModel::mudarSenha,
+            enabled = !viewModel.carregando,
+            placeholder = { Text(text = "Nova senha (opcional)", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             shape = RoundedCornerShape(12.dp),
@@ -103,11 +99,20 @@ fun TelaLogin(
             modifier = Modifier.fillMaxWidth()
         )
 
-        authViewModel.mensagem?.let {
+        Text(
+            text = "Deixe a senha em branco para manter a atual",
+            color = Color(0xFFA0A0A0),
+            fontSize = 12.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+        )
+
+        viewModel.mensagem?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = it, color = Color(0xFFEF224A))
         }
-        if (authViewModel.carregando) {
+        if (viewModel.carregando) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Aguarde...", color = Color.Black)
         }
@@ -115,32 +120,27 @@ fun TelaLogin(
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
-            onClick = {
-                authViewModel.login(usuario, senha)
-                senha = ""
-            },
-            enabled = !authViewModel.carregando,
+            onClick = { viewModel.salvar() },
+            enabled = !viewModel.carregando && !viewModel.salvo,
             modifier = Modifier
                 .width(220.dp)
                 .height(55.dp)
                 .border(2.dp, Color.Black, RoundedCornerShape(28.dp)),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFEF224A),
+                containerColor = Color(0xFF1E88A8),
                 contentColor = Color.Black
             ),
             shape = RoundedCornerShape(28.dp)
         ) {
             Text(
-                text = "Entrar",
+                text = "Salvar",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
-
-        TextButton(onClick = onCriarContaClick, enabled = !authViewModel.carregando) {
-            Text("Não tem conta? Cadastre-se")
+        TextButton(onClick = onVoltarClick, enabled = !viewModel.carregando) {
+            Text("Cancelar")
         }
     }
 }

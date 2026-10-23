@@ -1,4 +1,4 @@
-package com.example.decifraappescolhaumtema
+package com.example.decifraappescolhaumtema.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,8 +33,9 @@ import androidx.compose.ui.unit.sp
 import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 
 @Composable
-fun TelaCriarConta(
-    onContaCriadaClick: () -> Unit,
+fun TelaLogin(
+    onEntrarClick: () -> Unit,
+    onCriarContaClick: () -> Unit,
     authViewModel: AuthViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -44,7 +45,7 @@ fun TelaCriarConta(
     LaunchedEffect(authViewModel.concluido) {
         if (authViewModel.concluido) {
             authViewModel.consumirResultado()
-            onContaCriadaClick()
+            onEntrarClick()
         }
     }
 
@@ -57,7 +58,7 @@ fun TelaCriarConta(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Criar conta",
+            text = "Login",
             fontSize = 36.sp,
             fontWeight = FontWeight.Normal,
             color = Color.Black
@@ -102,15 +103,6 @@ fun TelaCriarConta(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Text(
-            text = "Use uma senha entre 6 e 128 caracteres",
-            color = Color(0xFFA0A0A0),
-            fontSize = 12.sp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp)
-        )
-
         authViewModel.mensagem?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = it, color = Color(0xFFEF224A))
@@ -124,7 +116,7 @@ fun TelaCriarConta(
 
         Button(
             onClick = {
-                authViewModel.cadastrar(usuario, senha)
+                authViewModel.login(usuario, senha)
                 senha = ""
             },
             enabled = !authViewModel.carregando,
@@ -133,20 +125,22 @@ fun TelaCriarConta(
                 .height(55.dp)
                 .border(2.dp, Color.Black, RoundedCornerShape(28.dp)),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF1E88A8),
+                containerColor = Color(0xFFEF224A),
                 contentColor = Color.Black
             ),
             shape = RoundedCornerShape(28.dp)
         ) {
             Text(
-                text = "Criar",
+                text = "Entrar",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        TextButton(onClick = onContaCriadaClick, enabled = !authViewModel.carregando) {
-            Text("Já tenho cadastro.")
+        Spacer(modifier = Modifier.height(48.dp))
+
+        TextButton(onClick = onCriarContaClick, enabled = !authViewModel.carregando) {
+            Text("Não tem conta? Cadastre-se")
         }
     }
 }
