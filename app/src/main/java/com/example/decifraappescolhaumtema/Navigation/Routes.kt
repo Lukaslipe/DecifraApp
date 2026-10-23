@@ -34,3 +34,6 @@ data class Jogo(val tema: String){
 
 @Serializable
 data class Acerto(val palavra: String, val pontos: Int, val venceu: Boolean = true)
+
+@Serializable
+data object Usuarios
