@@ -17,7 +17,7 @@ object BancoPalavras {
             "QUIBE", "PASTA", "MOLHO", "FRUTA", "DOCES"
         ),
         "Profissões" to listOf(
-            "ATORS", "PADRE", "MAGOS", "POETA", "CAIXA",
+            "AUTOR", "PADRE", "MAGOS", "POETA", "CAIXA",
             "JUIZA", "SERVO", "MUSAS", "CHEFE", "GUIAS",
             "COXAS", "VIGIA", "DAMAS", "REINA", "SABIO"
         ),
