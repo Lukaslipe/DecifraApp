@@ -13,9 +13,7 @@ data object Login{
 }
 
 @Serializable
-data object CriarConta{
-
-}
+data class CriarConta(val origemUsuarios: Boolean = false)
 
 @Serializable
 data object Instrucoes{
@@ -37,3 +35,6 @@ data class Acerto(val palavra: String, val pontos: Int, val venceu: Boolean = tr
 
 @Serializable
 data object Usuarios
+
+@Serializable
+data class AlterarUsuario(val id: Long)
