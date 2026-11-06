@@ -41,3 +41,15 @@ data class AlterarUsuario(val id: Long)
 
 @Serializable
 data object Ranking
+
+@Serializable
+data object EditarMenu
+
+@Serializable
+data object Categorias
+
+@Serializable
+data object CriarCategoria
+
+@Serializable
+data class AlterarCategoria(val id: Int, val nomeAtual: String)

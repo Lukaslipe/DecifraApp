@@ -1,6 +1,6 @@
 package com.example.decifraappescolhaumtema.Navigation
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -17,6 +17,18 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    // Estado local para gerir as categorias dinamicamente
+    var listaCategoriasState by remember {
+        mutableStateOf(
+            mutableListOf(
+                CategoriaModel(1, "Comida"),
+                CategoriaModel(2, "Animais"),
+                CategoriaModel(3, "Bebidas"),
+                CategoriaModel(4, "Planetas")
+            )
+        )
+    }
+
     NavHost(
         navController = navController,
         startDestination = Inicial,
@@ -69,8 +81,63 @@ fun AppNavigation(
                 onContinuarClick = {
                     navController.navigate(EscolherTema)
                 },
+                onEditarMenuClick = {
+                    navController.navigate(EditarMenu)
+                }
+            )
+        }
+
+        composable<EditarMenu> {
+            TelaEditarMenu(
                 onUsuariosClick = {
                     navController.navigate(Usuarios)
+                },
+                onCategoriasClick = {
+                    navController.navigate(Categorias)
+                },
+                onPalavrasClick = {
+                }
+            )
+        }
+
+        composable<Categorias> {
+            TelaCategoriasCustom(
+                categorias = listaCategoriasState,
+                onNovaCategoriaClick = {
+                    navController.navigate(CriarCategoria)
+                },
+                onAtualizarListaClick = {
+                    // Ação de atualizar/recarregar se necessário
+                },
+                onExcluirClick = { cat ->
+                    listaCategoriasState = listaCategoriasState.filter { it.id != cat.id }.toMutableList()
+                },
+                onAlterarClick = { cat ->
+                    navController.navigate(AlterarCategoria(id = cat.id, nomeAtual = cat.nome))
+                }
+            )
+        }
+
+        composable<CriarCategoria> {
+            TelaCriarCategoria(
+                onCategoriaCriada = { novoNome ->
+                    val novaId = (listaCategoriasState.maxOfOrNull { it.id } ?: 0) + 1
+                    listaCategoriasState = (listaCategoriasState + CategoriaModel(novaId, novoNome)).toMutableList()
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<AlterarCategoria> { backStackEntry ->
+            val args = backStackEntry.toRoute<AlterarCategoria>()
+            TelaAlterarCategoria(
+                id = args.id,
+                nomeAtual = args.nomeAtual,
+                onSalvarAlteracao = { idCat, novoNome ->
+                    listaCategoriasState = listaCategoriasState.map {
+                        if (it.id == idCat) it.copy(nome = novoNome) else it
+                    }.toMutableList()
+                    navController.popBackStack()
                 }
             )
         }
