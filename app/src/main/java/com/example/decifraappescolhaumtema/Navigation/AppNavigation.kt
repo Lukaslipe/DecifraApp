@@ -10,6 +10,7 @@ import androidx.navigation.toRoute
 import com.example.decifraappescolhaumtema.ui.screens.*
 import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.JogoViewModel
+import com.example.decifraappescolhaumtema.ui.viewmodel.PalavraViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
 
 @Composable
@@ -28,6 +29,9 @@ fun AppNavigation(
             )
         )
     }
+
+    // Uma única instância (escopo da Activity) para a lista e a criação de palavras compartilharem o estado
+    val palavraViewModel: PalavraViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -96,6 +100,7 @@ fun AppNavigation(
                     navController.navigate(Categorias)
                 },
                 onPalavrasClick = {
+                    navController.navigate(AlterarPalavras)
                 }
             )
         }
@@ -215,6 +220,39 @@ fun AppNavigation(
                 usuarioId = args.id,
                 viewModel = viewModel(),
                 onVoltarClick = { navController.popBackStack() }
+            )
+        }
+
+        composable<AlterarPalavras> {
+            TelaAlterarPalavras(
+                palavras = palavraViewModel.palavrasList,
+                onNovaPalavraClick = {
+                    navController.navigate(CriarPalavra)
+                },
+                onAtualizarListaClick = {
+                    palavraViewModel.carregarPalavras()
+                },
+                onAlterarClick = { },
+                onExcluirClick = { id ->
+                    palavraViewModel.excluirPalavra(id)
+                }
+            )
+        }
+
+        composable<CriarPalavra> {
+            TelaCriarPalavra(
+                palavra = palavraViewModel.palavra,
+                onPalavraChange = palavraViewModel::mudarPalavra,
+                categoria = palavraViewModel.categoria,
+                onCategoriaChange = palavraViewModel::mudarCategoria,
+                categoriasDisponiveis = palavraViewModel.categoriasList,
+                onCriarClick = {
+                    palavraViewModel.salvarPalavra()
+                    navController.popBackStack()
+                },
+                onVoltarClick = {
+                    navController.popBackStack()
+                }
             )
         }
     }

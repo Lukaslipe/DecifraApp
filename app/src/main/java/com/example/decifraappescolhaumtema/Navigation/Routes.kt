@@ -53,3 +53,9 @@ data object CriarCategoria
 
 @Serializable
 data class AlterarCategoria(val id: Int, val nomeAtual: String)
+
+@Serializable
+data object AlterarPalavras
+
+@Serializable
+data object CriarPalavra
