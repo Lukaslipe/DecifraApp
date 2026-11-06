@@ -1,5 +1,8 @@
 package com.example.decifraappescolhaumtema.ui.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -8,24 +11,57 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.decifraappescolhaumtema.R
 import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
+// IMPORTANTE: Verifique se o import abaixo condiz com a pasta onde você criou o LocalzacaoViewModel
+import com.example.decifraappescolhaumtema.ui.viewmodel.LocalizacaoViewModel
 
 @Composable
 fun TelaRanking(
     viewModel: UsuarioViewModel,
+    localizacaoViewModel: LocalizacaoViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(
+            androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application
+        )
+    ),
     onReiniciarClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(Unit) { viewModel.carregarRanking() }
+    val cicloDeVida = LocalLifecycleOwner.current
+    val permissao = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { autorizada -> localizacaoViewModel.buscar(autorizada) }
+
+    DisposableEffect(cicloDeVida, localizacaoViewModel) {
+        val observador = LifecycleEventObserver{_, evento ->
+            if (evento == Lifecycle.Event.ON_STOP) localizacaoViewModel.cancelar()
+        }
+        cicloDeVida.lifecycle.addObserver(observador)
+        onDispose {
+            cicloDeVida.lifecycle.removeObserver(observador)
+            localizacaoViewModel.cancelar()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.carregarRanking()
+        permissao.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+    }
 
     val ranking = viewModel.ranking
     val usuarioAtualId = viewModel.usuarioAtivoId ?: -1L
@@ -52,14 +88,21 @@ fun TelaRanking(
                     .height(90.dp)
                     .background(Color(0xFFE2D6CB), RoundedCornerShape(4.dp))
                     .border(1.dp, Color(0xFFC8BCB2), RoundedCornerShape(4.dp)),
-                contentAlignment = Alignment.BottomStart
+                contentAlignment = Alignment.Center
             ) {
+                Text(
+                    text = localizacaoViewModel.bandeira,
+                    fontSize = 48.sp,
+                    textAlign = TextAlign.Center
+                )
+
                 Icon(
                     painter = painterResource(id = R.drawable.img_estrelas),
                     contentDescription = "Estrelas",
                     tint = Color.Unspecified,
                     modifier = Modifier
                         .size(44.dp)
+                        .align(Alignment.BottomStart)
                         .offset(x = (-16).dp, y = 16.dp)
                 )
             }
@@ -116,7 +159,8 @@ fun TelaRanking(
                             nome = usuario.nome,
                             posicao = index + 1,
                             pontos = usuario.pontos,
-                            destaque = usuario.id == usuarioAtualId
+                            destaque = usuario.id == usuarioAtualId,
+                            bandeira = if (usuario.id == usuarioAtualId) localizacaoViewModel.bandeira else "🏳️"
                         )
                     }
                 }
@@ -151,7 +195,8 @@ fun CardItemRanking(
     nome: String,
     posicao: Int,
     pontos: Int,
-    destaque: Boolean
+    destaque: Boolean,
+    bandeira: String
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -171,10 +216,8 @@ fun CardItemRanking(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = posicao.toString().padStart(2, '0'),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
+                text = bandeira,
+                fontSize = 20.sp
             )
         }
 
