@@ -1,9 +1,10 @@
 package com.example.decifraappescolhaumtema.validation
 
-import com.example.decifraappescolhaumtema.data.BancoPalavras
 import java.text.Normalizer
 
 object CatalogoValidator {
+    const val TAMANHO_PALAVRA = 5
+
     private val MARCAS_DE_ACENTO = Regex("\\p{M}+")
 
     fun categoria(nome: String): String {
@@ -18,8 +19,8 @@ object CatalogoValidator {
         val limpo = Normalizer.normalize(texto.trim(), Normalizer.Form.NFD)
             .replace(MARCAS_DE_ACENTO, "")
             .uppercase()
-        require(limpo.length == BancoPalavras.TAMANHO_PALAVRA && limpo.all { it in 'A'..'Z' }) {
-            "A palavra deve ter exatamente ${BancoPalavras.TAMANHO_PALAVRA} letras, sem números ou símbolos."
+        require(limpo.length == TAMANHO_PALAVRA && limpo.all { it in 'A'..'Z' }) {
+            "A palavra deve ter exatamente $TAMANHO_PALAVRA letras, sem números ou símbolos."
         }
         return limpo
     }

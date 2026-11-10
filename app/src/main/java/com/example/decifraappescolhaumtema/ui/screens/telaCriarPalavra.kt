@@ -33,8 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.decifraappescolhaumtema.data.BancoPalavras
 import com.example.decifraappescolhaumtema.ui.viewmodel.PalavraViewModel
+import com.example.decifraappescolhaumtema.validation.CatalogoValidator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +84,7 @@ fun TelaCriarPalavra(
 
         OutlinedTextField(
             value = texto,
-            onValueChange = { if (it.length <= BancoPalavras.TAMANHO_PALAVRA) texto = it },
+            onValueChange = { if (it.length <= CatalogoValidator.TAMANHO_PALAVRA) texto = it },
             enabled = !viewModel.carregando,
             placeholder = { Text(text = "Palavra", color = Color(0xFFA0A0A0)) },
             singleLine = true,
@@ -101,7 +101,7 @@ fun TelaCriarPalavra(
         )
 
         Text(
-            text = "${BancoPalavras.TAMANHO_PALAVRA} letras. Acentos são removidos automaticamente.",
+            text = "${CatalogoValidator.TAMANHO_PALAVRA} letras. Acentos são removidos automaticamente.",
             color = Color(0xFFA0A0A0),
             fontSize = 12.sp,
             modifier = Modifier

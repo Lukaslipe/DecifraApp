@@ -7,9 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.decifraappescolhaumtema.auth.SessaoUsuario
-import com.example.decifraappescolhaumtema.data.BancoPalavras
 import com.example.decifraappescolhaumtema.data.dal.PalavraDao
 import com.example.decifraappescolhaumtema.data.dal.UsuarioDao
+import com.example.decifraappescolhaumtema.validation.CatalogoValidator
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,7 +34,7 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = UsuarioDao(application)
     private val palavraDao = PalavraDao(application)
 
-    private val tamanho = BancoPalavras.TAMANHO_PALAVRA
+    private val tamanho = CatalogoValidator.TAMANHO_PALAVRA
     private val maxTentativas = 6
 
     private var palavraSecreta: String = ""
