@@ -13,15 +13,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.decifraappescolhaumtema.ui.viewmodel.CategoriaViewModel
 
 @Composable
 fun TelaAlterarCategoria(
-    id: Int,
+    id: Long,
     nomeAtual: String,
-    onSalvarAlteracao: (Int, String) -> Unit,
+    viewModel: CategoriaViewModel,
+    onVoltarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var nomeCategoria by remember { mutableStateOf(nomeAtual) }
+
+    LaunchedEffect(Unit) {
+        viewModel.limparMensagem()
+        viewModel.consumirSalvo()
+    }
+    LaunchedEffect(viewModel.salvo) {
+        if (viewModel.salvo) {
+            viewModel.consumirSalvo()
+            onVoltarClick()
+        }
+    }
 
     Box(
         modifier = modifier
@@ -45,7 +58,8 @@ fun TelaAlterarCategoria(
 
             OutlinedTextField(
                 value = nomeCategoria,
-                onValueChange = { nomeCategoria = it },
+                onValueChange = { if (it.length <= 30) nomeCategoria = it },
+                enabled = !viewModel.carregando,
                 placeholder = { Text("Nome da categoria", color = Color.Gray) },
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
@@ -60,14 +74,16 @@ fun TelaAlterarCategoria(
                 singleLine = true
             )
 
+            viewModel.mensagem?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = it, color = Color(0xFFEF224A))
+            }
+
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = {
-                    if (nomeCategoria.isNotBlank()) {
-                        onSalvarAlteracao(id, nomeCategoria)
-                    }
-                },
+                onClick = { viewModel.alterar(id, nomeCategoria) },
+                enabled = !viewModel.carregando && !viewModel.salvo,
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
                     .height(50.dp)
@@ -82,6 +98,10 @@ fun TelaAlterarCategoria(
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
+            }
+
+            TextButton(onClick = onVoltarClick, enabled = !viewModel.carregando) {
+                Text("Cancelar")
             }
         }
     }

@@ -10,6 +10,7 @@ import androidx.navigation.toRoute
 import com.example.decifraappescolhaumtema.ui.screens.*
 import com.example.decifraappescolhaumtema.ui.viewmodel.AuthViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.JogoViewModel
+import com.example.decifraappescolhaumtema.ui.viewmodel.CategoriaViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.PalavraViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
 
@@ -18,19 +19,7 @@ fun AppNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    // Estado local para gerir as categorias dinamicamente
-    var listaCategoriasState by remember {
-        mutableStateOf(
-            mutableListOf(
-                CategoriaModel(1, "Comida"),
-                CategoriaModel(2, "Animais"),
-                CategoriaModel(3, "Bebidas"),
-                CategoriaModel(4, "Planetas")
-            )
-        )
-    }
-
-    // Uma única instância (escopo da Activity) para a lista e a criação de palavras compartilharem o estado
+    val categoriaViewModel: CategoriaViewModel = viewModel()
     val palavraViewModel: PalavraViewModel = viewModel()
 
     NavHost(
@@ -106,16 +95,22 @@ fun AppNavigation(
         }
 
         composable<Categorias> {
+            LaunchedEffect(Unit) {
+                categoriaViewModel.limparMensagem()
+                categoriaViewModel.listar()
+            }
             TelaCategoriasCustom(
-                categorias = listaCategoriasState,
+                categorias = categoriaViewModel.categorias,
+                mensagem = categoriaViewModel.mensagem,
+                carregando = categoriaViewModel.carregando,
                 onNovaCategoriaClick = {
                     navController.navigate(CriarCategoria)
                 },
                 onAtualizarListaClick = {
-                    // Ação de atualizar/recarregar se necessário
+                    categoriaViewModel.listar()
                 },
                 onExcluirClick = { cat ->
-                    listaCategoriasState = listaCategoriasState.filter { it.id != cat.id }.toMutableList()
+                    categoriaViewModel.excluir(cat.id)
                 },
                 onAlterarClick = { cat ->
                     navController.navigate(AlterarCategoria(id = cat.id, nomeAtual = cat.nome))
@@ -125,11 +120,8 @@ fun AppNavigation(
 
         composable<CriarCategoria> {
             TelaCriarCategoria(
-                onCategoriaCriada = { novoNome ->
-                    val novaId = (listaCategoriasState.maxOfOrNull { it.id } ?: 0) + 1
-                    listaCategoriasState = (listaCategoriasState + CategoriaModel(novaId, novoNome)).toMutableList()
-                    navController.popBackStack()
-                }
+                viewModel = categoriaViewModel,
+                onVoltarClick = { navController.popBackStack() }
             )
         }
 
@@ -138,17 +130,15 @@ fun AppNavigation(
             TelaAlterarCategoria(
                 id = args.id,
                 nomeAtual = args.nomeAtual,
-                onSalvarAlteracao = { idCat, novoNome ->
-                    listaCategoriasState = listaCategoriasState.map {
-                        if (it.id == idCat) it.copy(nome = novoNome) else it
-                    }.toMutableList()
-                    navController.popBackStack()
-                }
+                viewModel = categoriaViewModel,
+                onVoltarClick = { navController.popBackStack() }
             )
         }
 
         composable<EscolherTema> {
+            LaunchedEffect(Unit) { categoriaViewModel.listar() }
             TelaEscolhaTema(
+                temas = categoriaViewModel.temasJogaveis,
                 onTemaSelecionado = { temaEscolhido ->
                     navController.navigate(Jogo(tema = temaEscolhido))
                 }
@@ -224,35 +214,42 @@ fun AppNavigation(
         }
 
         composable<AlterarPalavras> {
+            LaunchedEffect(Unit) {
+                palavraViewModel.limparMensagem()
+                palavraViewModel.listar()
+            }
             TelaAlterarPalavras(
-                palavras = palavraViewModel.palavrasList,
+                palavras = palavraViewModel.palavras,
+                mensagem = palavraViewModel.mensagem,
+                carregando = palavraViewModel.carregando,
                 onNovaPalavraClick = {
                     navController.navigate(CriarPalavra)
                 },
                 onAtualizarListaClick = {
-                    palavraViewModel.carregarPalavras()
+                    palavraViewModel.listar()
                 },
-                onAlterarClick = { },
+                onAlterarClick = { id ->
+                    navController.navigate(EditarPalavra(id = id))
+                },
                 onExcluirClick = { id ->
-                    palavraViewModel.excluirPalavra(id)
+                    palavraViewModel.excluir(id)
                 }
             )
         }
 
         composable<CriarPalavra> {
             TelaCriarPalavra(
-                palavra = palavraViewModel.palavra,
-                onPalavraChange = palavraViewModel::mudarPalavra,
-                categoria = palavraViewModel.categoria,
-                onCategoriaChange = palavraViewModel::mudarCategoria,
-                categoriasDisponiveis = palavraViewModel.categoriasList,
-                onCriarClick = {
-                    palavraViewModel.salvarPalavra()
-                    navController.popBackStack()
-                },
-                onVoltarClick = {
-                    navController.popBackStack()
-                }
+                viewModel = palavraViewModel,
+                onVoltarClick = { navController.popBackStack() }
+            )
+        }
+
+        composable<EditarPalavra> { backStackEntry ->
+            val args = backStackEntry.toRoute<EditarPalavra>()
+            TelaCriarPalavra(
+                viewModel = palavraViewModel,
+                palavraId = args.id,
+                onVoltarClick = { navController.popBackStack() }
             )
         }
     }

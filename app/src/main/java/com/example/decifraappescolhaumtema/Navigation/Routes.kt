@@ -52,10 +52,13 @@ data object Categorias
 data object CriarCategoria
 
 @Serializable
-data class AlterarCategoria(val id: Int, val nomeAtual: String)
+data class AlterarCategoria(val id: Long, val nomeAtual: String)
 
 @Serializable
 data object AlterarPalavras
 
 @Serializable
 data object CriarPalavra
+
+@Serializable
+data class EditarPalavra(val id: Long)

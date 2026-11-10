@@ -26,7 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontStyle
-import com.example.decifraappescolhaumtema.data.PiadaApi
+import com.example.decifraappescolhaumtema.data.ConselhoApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,12 +46,12 @@ fun TelaAcerto(
     onRankingClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var piada by remember { mutableStateOf("Carregando piada...") }
+    var conselho by remember { mutableStateOf("Carregando conselho...") }
     LaunchedEffect(Unit) {
-        piada = try {
-            PiadaApi.service.buscarPiada().piada
+        conselho = try {
+            "\"${ConselhoApi.service.buscarConselho().slip.advice}\""
         } catch (e: Exception) {
-            "Não foi possível carregar a piada."
+            "Não foi possível carregar o conselho."
         }
     }
 
@@ -171,7 +171,7 @@ fun TelaAcerto(
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = piada,
+            text = conselho,
             fontSize = 16.sp,
             fontStyle = FontStyle.Italic,
             color = Color.DarkGray,

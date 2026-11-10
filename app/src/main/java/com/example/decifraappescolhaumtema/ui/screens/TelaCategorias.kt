@@ -16,21 +16,43 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class CategoriaModel(
-    val id: Int,
-    val nome: String
-)
+import com.example.decifraappescolhaumtema.data.model.Categoria
 
 @Composable
 fun TelaCategoriasCustom(
-    categorias: List<CategoriaModel>,
+    categorias: List<Categoria>,
+    mensagem: String? = null,
+    carregando: Boolean = false,
     onNovaCategoriaClick: () -> Unit = {},
     onAtualizarListaClick: () -> Unit = {},
-    onAlterarClick: (CategoriaModel) -> Unit = {},
-    onExcluirClick: (CategoriaModel) -> Unit = {},
+    onAlterarClick: (Categoria) -> Unit = {},
+    onExcluirClick: (Categoria) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    var categoriaParaExcluir by remember { mutableStateOf<Categoria?>(null) }
+
+    categoriaParaExcluir?.let { categoria ->
+        AlertDialog(
+            onDismissRequest = { categoriaParaExcluir = null },
+            title = { Text("Excluir categoria") },
+            text = {
+                Text(
+                    "Excluir \"${categoria.nome}\"? " +
+                            "As ${categoria.totalPalavras} palavras dessa categoria também serão excluídas."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    categoriaParaExcluir = null
+                    onExcluirClick(categoria)
+                }) { Text("Excluir", color = Color.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { categoriaParaExcluir = null }) { Text("Cancelar") }
+            }
+        )
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -75,6 +97,7 @@ fun TelaCategoriasCustom(
 
                 Button(
                     onClick = onAtualizarListaClick,
+                    enabled = !carregando,
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
@@ -92,7 +115,20 @@ fun TelaCategoriasCustom(
                 }
             }
 
+            mensagem?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = it, color = Color(0xFFF2385A))
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
+
+            if (categorias.isEmpty() && !carregando) {
+                Text(
+                    text = "Nenhuma categoria cadastrada.",
+                    fontSize = 16.sp,
+                    color = Color(0xFF555555)
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
@@ -122,6 +158,13 @@ fun TelaCategoriasCustom(
                                 color = Color.Black
                             )
 
+                            Text(
+                                text = if (categoria.totalPalavras == 1) "1 palavra"
+                                else "${categoria.totalPalavras} palavras",
+                                fontSize = 13.sp,
+                                color = Color(0xFF555555)
+                            )
+
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Row(
@@ -141,7 +184,7 @@ fun TelaCategoriasCustom(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Red,
-                                    modifier = Modifier.clickable { onExcluirClick(categoria) }
+                                    modifier = Modifier.clickable { categoriaParaExcluir = categoria }
                                 )
                             }
                         }

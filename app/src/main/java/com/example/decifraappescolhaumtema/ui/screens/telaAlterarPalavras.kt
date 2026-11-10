@@ -27,12 +27,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class PalavraItem(val id: Long, val texto: String, val categoria: String = "")
+import com.example.decifraappescolhaumtema.data.model.Palavra
 
 @Composable
 fun TelaAlterarPalavras(
-    palavras: List<PalavraItem>,
+    palavras: List<Palavra>,
+    mensagem: String? = null,
+    carregando: Boolean = false,
     onNovaPalavraClick: () -> Unit,
     onAtualizarListaClick: () -> Unit,
     onAlterarClick: (Long) -> Unit,
@@ -75,6 +76,7 @@ fun TelaAlterarPalavras(
 
             Button(
                 onClick = onAtualizarListaClick,
+                enabled = !carregando,
                 modifier = Modifier
                     .height(45.dp)
                     .border(1.5.dp, Color.Black, RoundedCornerShape(20.dp)),
@@ -88,13 +90,26 @@ fun TelaAlterarPalavras(
             }
         }
 
+        mensagem?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = Color(0xFFF2385A))
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
+
+        if (palavras.isEmpty() && !carregando) {
+            Text(
+                text = "Nenhuma palavra cadastrada.",
+                fontSize = 16.sp,
+                color = Color(0xFF555555)
+            )
+        }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(palavras) { palavra ->
+            items(palavras, key = { it.id }) { palavra ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -113,6 +128,12 @@ fun TelaAlterarPalavras(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
+                        )
+
+                        Text(
+                            text = palavra.categoria,
+                            fontSize = 13.sp,
+                            color = Color(0xFF555555)
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -148,10 +169,10 @@ fun TelaAlterarPalavras(
 @Composable
 fun TelaAlterarPalavrasPreview() {
     val listaExemplo = listOf(
-        PalavraItem(1, "Amigo"),
-        PalavraItem(2, "Porta"),
-        PalavraItem(3, "Mundo"),
-        PalavraItem(4, "Saber")
+        Palavra(1, "AMIGO", 1, "Pessoas"),
+        Palavra(2, "PORTA", 2, "Objetos"),
+        Palavra(3, "MUNDO", 3, "Lugares"),
+        Palavra(4, "SABER", 4, "Verbos")
     )
 
     TelaAlterarPalavras(

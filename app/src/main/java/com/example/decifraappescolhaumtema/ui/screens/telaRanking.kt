@@ -28,7 +28,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.decifraappescolhaumtema.R
 import com.example.decifraappescolhaumtema.ui.viewmodel.UsuarioViewModel
-// IMPORTANTE: Verifique se o import abaixo condiz com a pasta onde você criou o LocalzacaoViewModel
 import com.example.decifraappescolhaumtema.ui.viewmodel.LocalizacaoViewModel
 
 @Composable

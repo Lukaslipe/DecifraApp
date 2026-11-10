@@ -10,36 +10,32 @@ import retrofit2.http.GET
 import java.util.concurrent.TimeUnit
 
 @Serializable
-data class PiadaResponse(val piada: String)
+data class Conselho(val id: Int, val advice: String)
 
-interface PiadaService {
-    @GET("piada")
-    suspend fun buscarPiada(): PiadaResponse
+@Serializable
+data class ConselhoResponse(val slip: Conselho)
+
+interface ConselhoService {
+    @GET("advice")
+    suspend fun buscarConselho(): ConselhoResponse
 }
 
-object PiadaApi {
-    private const val BASE_URL = "http://10.0.2.2:3000/"
+object ConselhoApi {
+    private const val BASE_URL = "https://api.adviceslip.com/"
 
     private val json = Json { ignoreUnknownKeys = true }
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(5, TimeUnit.SECONDS)
-        .addInterceptor { chain ->
-            chain.proceed(
-                chain.request().newBuilder()
-                    .header("ngrok-skip-browser-warning", "true")
-                    .build()
-            )
-        }
         .build()
 
-    val service: PiadaService by lazy {
+    val service: ConselhoService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
-            .create(PiadaService::class.java)
+            .create(ConselhoService::class.java)
     }
 }

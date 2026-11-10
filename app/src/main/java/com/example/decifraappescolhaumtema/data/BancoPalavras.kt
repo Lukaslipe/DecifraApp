@@ -4,7 +4,7 @@ object BancoPalavras {
 
     const val TAMANHO_PALAVRA = 5
 
-    private val palavrasPorTema: Map<String, List<String>> = mapOf(
+    val padrao: Map<String, List<String>> = mapOf(
         "Animais" to listOf(
             "GATOS", "TIGRE", "ZEBRA", "POMBO", "URSOS",
             "GANSO", "PUMAS", "FOCAS", "LOBOS", "COBRA",
@@ -26,9 +26,4 @@ object BancoPalavras {
             "SOFAS", "LUVAS", "VELAS", "BOLSA", "REMOS"
         )
     )
-
-    fun sortear(tema: String): String {
-        val lista = palavrasPorTema[tema] ?: palavrasPorTema.values.first()
-        return lista.random()
-    }
 }

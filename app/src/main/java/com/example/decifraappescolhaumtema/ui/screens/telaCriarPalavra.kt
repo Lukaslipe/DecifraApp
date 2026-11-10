@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,23 +31,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.decifraappescolhaumtema.data.BancoPalavras
+import com.example.decifraappescolhaumtema.ui.viewmodel.PalavraViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TelaCriarPalavra(
-    palavra: String,
-    onPalavraChange: (String) -> Unit,
-    categoria: String,
-    onCategoriaChange: (String) -> Unit,
-    categoriasDisponiveis: List<String>,
-    onCriarClick: () -> Unit,
+    viewModel: PalavraViewModel,
+    palavraId: Long? = null,
     onVoltarClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val existente = palavraId?.let { id -> viewModel.palavras.firstOrNull { it.id == id } }
+
+    var texto by remember(existente?.id) { mutableStateOf(existente?.texto ?: "") }
+    var categoriaId by remember(existente?.id) { mutableStateOf(existente?.categoriaId) }
     var expanded by remember { mutableStateOf(false) }
+
+    val categoriaNome = viewModel.categorias.firstOrNull { it.id == categoriaId }?.nome ?: ""
+    val editando = palavraId != null
+
+    LaunchedEffect(Unit) {
+        viewModel.limparMensagem()
+        viewModel.consumirSalvo()
+        viewModel.listar()
+    }
+    LaunchedEffect(viewModel.salvo) {
+        if (viewModel.salvo) {
+            viewModel.consumirSalvo()
+            onVoltarClick()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -57,7 +74,7 @@ fun TelaCriarPalavra(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Criar palavra",
+            text = if (editando) "Alterar palavra" else "Criar palavra",
             fontSize = 36.sp,
             fontWeight = FontWeight.Normal,
             color = Color.Black
@@ -66,8 +83,9 @@ fun TelaCriarPalavra(
         Spacer(modifier = Modifier.height(48.dp))
 
         OutlinedTextField(
-            value = palavra,
-            onValueChange = onPalavraChange,
+            value = texto,
+            onValueChange = { if (it.length <= BancoPalavras.TAMANHO_PALAVRA) texto = it },
+            enabled = !viewModel.carregando,
             placeholder = { Text(text = "Palavra", color = Color(0xFFA0A0A0)) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
@@ -82,15 +100,24 @@ fun TelaCriarPalavra(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Text(
+            text = "${BancoPalavras.TAMANHO_PALAVRA} letras. Acentos são removidos automaticamente.",
+            color = Color(0xFFA0A0A0),
+            fontSize = 12.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = { expanded = !expanded },
+            onExpandedChange = { if (!viewModel.carregando) expanded = !expanded },
             modifier = Modifier.fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = categoria,
+                value = categoriaNome,
                 onValueChange = {},
                 readOnly = true,
                 placeholder = { Text(text = "Selecione a Categoria", color = Color(0xFFA0A0A0)) },
@@ -113,11 +140,11 @@ fun TelaCriarPalavra(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                categoriasDisponiveis.forEach { item ->
+                viewModel.categorias.forEach { item ->
                     DropdownMenuItem(
-                        text = { Text(text = item) },
+                        text = { Text(text = item.nome) },
                         onClick = {
-                            onCategoriaChange(item)
+                            categoriaId = item.id
                             expanded = false
                         }
                     )
@@ -125,10 +152,22 @@ fun TelaCriarPalavra(
             }
         }
 
+        viewModel.mensagem?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it, color = Color(0xFFEF224A))
+        }
+
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
-            onClick = onCriarClick,
+            onClick = {
+                if (palavraId == null) {
+                    viewModel.criar(texto, categoriaId)
+                } else {
+                    viewModel.alterar(palavraId, texto, categoriaId)
+                }
+            },
+            enabled = !viewModel.carregando && !viewModel.salvo,
             modifier = Modifier
                 .width(220.dp)
                 .height(55.dp)
@@ -140,28 +179,14 @@ fun TelaCriarPalavra(
             shape = RoundedCornerShape(28.dp)
         ) {
             Text(
-                text = "Criar",
+                text = if (editando) "Salvar" else "Criar",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        TextButton(onClick = onVoltarClick) {
+        TextButton(onClick = onVoltarClick, enabled = !viewModel.carregando) {
             Text("Cancelar")
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TelaCriarPalavraPreview() {
-    TelaCriarPalavra(
-        palavra = "",
-        onPalavraChange = {},
-        categoria = "",
-        onCategoriaChange = {},
-        categoriasDisponiveis = listOf("Animais", "Frutas", "Objetos"),
-        onCriarClick = {},
-        onVoltarClick = {}
-    )
 }

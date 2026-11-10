@@ -8,8 +8,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.decifraappescolhaumtema.auth.SessaoUsuario
 import com.example.decifraappescolhaumtema.data.BancoPalavras
+import com.example.decifraappescolhaumtema.data.dal.PalavraDao
 import com.example.decifraappescolhaumtema.data.dal.UsuarioDao
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -29,6 +32,7 @@ enum class EstadoJogo {
 class JogoViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dao = UsuarioDao(application)
+    private val palavraDao = PalavraDao(application)
 
     private val tamanho = BancoPalavras.TAMANHO_PALAVRA
     private val maxTentativas = 6
@@ -62,9 +66,12 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
 
     val palavraCerta: String get() = palavraSecreta
 
+    private var sorteio: Job? = null
+
     fun iniciar(tema: String) {
+        sorteio?.cancel()
         this.tema = tema
-        palavraSecreta = BancoPalavras.sortear(tema)
+        palavraSecreta = ""
         tentativas = List(maxTentativas) { List(tamanho) { ' ' } }
         resultados = List(maxTentativas) { List(tamanho) { Resultado.VAZIA } }
         linhaAtual = 0
@@ -72,9 +79,25 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
         estado = EstadoJogo.JOGANDO
         pontos = 0
         mensagem = null
+
+        sorteio = viewModelScope.launch {
+            try {
+                val palavra = withContext(Dispatchers.IO) { palavraDao.sortear(tema) }
+                if (palavra == null) {
+                    mensagem = "Nenhuma palavra cadastrada para este tema."
+                } else {
+                    palavraSecreta = palavra
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                mensagem = "Não foi possível carregar a palavra."
+            }
+        }
     }
 
     fun digitar(letra: Char) {
+        if (palavraSecreta.isEmpty()) return
         if (estado != EstadoJogo.JOGANDO) return
         if (colunaAtual >= tamanho) return
 
@@ -86,6 +109,7 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun apagar() {
+        if (palavraSecreta.isEmpty()) return
         if (estado != EstadoJogo.JOGANDO) return
         if (colunaAtual <= 0) return
 
@@ -97,6 +121,7 @@ class JogoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun confirmar() {
+        if (palavraSecreta.isEmpty()) return
         if (estado != EstadoJogo.JOGANDO) return
         if (colunaAtual < tamanho) {
             mensagem = "Complete as $tamanho letras."

@@ -3,8 +3,10 @@ package com.example.decifraappescolhaumtema.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,8 +26,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private val CoresTema = listOf(
+    Color(0xFFEF224A) to Color.White,
+    Color(0xFF66b71b) to Color.Black,
+    Color(0xFF1589a7) to Color.White,
+    Color(0xFFedc009) to Color.Black
+)
+
 @Composable
 fun TelaEscolhaTema(
+    temas: List<String>,
     onTemaSelecionado: (String) -> Unit,
     modifier: Modifier = Modifier
 
@@ -59,48 +69,39 @@ fun TelaEscolhaTema(
 
         Spacer(modifier = Modifier.height(60.dp))
 
-        Column(
-            modifier = Modifier.width(IntrinsicSize.Max),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
+        if (temas.isEmpty()) {
+            Text(
+                text = "Nenhum tema disponível.\nCadastre categorias e palavras no menu de edição.",
+                fontSize = 16.sp,
+                color = Color(0xFF555555),
+                textAlign = TextAlign.Center
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .weight(1f, fill = false),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                BotaoTema(
-                    text = "Animais",
-                    containerColor = Color(0xFFEF224A),
-                    textColor = Color.White,
-                    onClick = {onTemaSelecionado("Animais") },
-                    modifier = Modifier.weight(1f)
-                )
-                BotaoTema(
-                    text = "Comidas",
-                    containerColor = Color(0xFF66b71b),
-                    textColor = Color.Black,
-                    onClick = {onTemaSelecionado("Comidas")},
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                BotaoTema(
-                    text = "Profissões",
-                    containerColor = Color(0xFF1589a7),
-                    textColor = Color.White,
-                    onClick = {onTemaSelecionado("Profissões")},
-                    modifier = Modifier.weight(1f)
-                )
-                BotaoTema(
-                    text = "Objetos",
-                    containerColor = Color(0xFFedc009),
-                    textColor = Color.Black,
-                    onClick = { onTemaSelecionado("Objetos")},
-                    modifier = Modifier.weight(1f)
-                )
+                itemsIndexed(temas.chunked(2)) { linha, par ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        par.forEachIndexed { coluna, tema ->
+                            val (fundo, texto) = CoresTema[(linha * 2 + coluna) % CoresTema.size]
+                            BotaoTema(
+                                text = tema,
+                                containerColor = fundo,
+                                textColor = texto,
+                                onClick = { onTemaSelecionado(tema) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (par.size == 1) Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
@@ -127,7 +128,9 @@ fun BotaoTema(
     ) {
         Text(
             text = text,
-            fontSize = 20.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
     }
